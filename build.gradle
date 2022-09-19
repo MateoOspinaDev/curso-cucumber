@@ -1,0 +1,59 @@
+//Que clases, tareas o complementos vamos a utilizar. Gradle puede trabajar sin este bloque, pero como vamos a usar
+//serenity, por lo que especificamos que trabajamos con un componente de un tercero.
+buildscript {
+    //En que repositorio web vamos a buscar los componentes
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    //Variables que representan las versiones de cucumber y serenity
+    ext{
+        serenityVersion = '3.1.0'
+        serenityCucumberVersion = '3.1.0'
+    }
+    //dependencia de tercero que vamos a utilizar
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:$rootProject.ext.serenityVersion")
+    }
+}
+
+//Estos plugins nos permiten optimizar la importacion del proyetco para generar los archivos de una forma eficiente
+plugins {
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+}
+
+//plugin de serenity
+apply plugin: 'net.serenity-bdd.aggregator'
+
+group 'com.mateoospina'
+version '1.0.0'
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    testImplementation "net.serenity-bdd:serenity-core:$rootProject.ext.serenityVersion" //core serenity
+    testImplementation "net.serenity-bdd:serenity-junit:$rootProject.ext.serenityVersion" //junit serenity
+    implementation "net.serenity-bdd:serenity-screenplay:$rootProject.ext.serenityVersion"
+    implementation "net.serenity-bdd:serenity-screenplay-webdriver:$rootProject.ext.serenityVersion"
+    implementation "net.serenity-bdd:serenity-cucumber:$rootProject.ext.serenityCucumberVersion" //cucumber serenity
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.assertj:assertj-core:3.9.1'
+
+    testImplementation 'org.slf4j:slf4j-simple:1.7.7' //Para ver los logs de serenity, sin esto genera un error
+    implementation 'junit:junit:4.12'
+}
+
+//Sin esto, el ide nos ignora las propiedades con -d en las tareas de test, con esto, las propiedades de ejecucion se ejecutan en test
+tasks.withType(Test){
+    systemProperties = System.properties as Map<String, ?> //Para que se puedan usar las variables de entorno
+    maxParallelForks = Runtime.runtime.availableProcessors()
+}
+
+gradle.startParameter.continueOnFailure = true //Para que no pare el proceso si falla un test
